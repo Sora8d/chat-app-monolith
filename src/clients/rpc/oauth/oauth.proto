@@ -1,0 +1,51 @@
+syntax= "proto3";
+
+option go_package= "github.com/Sora8d/chat-app-monolith/src/clients/rpc/oauth";
+
+package flydev_chat_oauth;
+
+service OauthProtoInterface{
+    rpc LoginUser (LoginRequest) returns (JWTwRrefreshUuidResponse) {}
+    rpc ValidateRefreshToken (JWT) returns (JWTwRrefreshUuidResponse) {}
+
+    rpc RevokeUsersTokens (Uuid) returns (Svr_msg) {}
+}
+
+message LoginRequest{
+    string username =1;
+    string password =2;
+}
+message Uuid {
+    string uuid =1;
+}
+
+message ServiceKey{
+    string Key = 1;
+}
+
+message JWT{
+    string Jwt =1;
+}
+
+message JWTResponse{
+    string Jwt =1;
+    Svr_msg Response =2;
+}
+
+message JWTwRrefreshUuidResponse{
+    string access_token = 1;
+    string refresh_token = 2;
+    Uuid Uuid=3;
+    Svr_msg Response =4;
+}
+
+message EntityResponse{
+    Uuid Uuid = 1;
+    int32 Permissions = 2;
+    Svr_msg Response = 3;
+}
+
+message Svr_msg{
+    int32 status=1;
+    string message=2;
+}

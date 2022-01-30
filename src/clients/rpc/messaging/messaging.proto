@@ -1,0 +1,119 @@
+syntax= "proto3";
+
+option go_package= "github.com/Sora8d/chat-app-monolith/src/clients/rpc/messaging";
+
+package flydevs_chat_app_messaging;
+
+    service MessagingProtoInterface{
+        rpc CreateConversation(Conversation) returns (UuidMsg) {}
+        
+        //Changed, now instead of returning conversations alone it returns an object with a conversation an its participants inside.
+        //Later should be fetched directly through JWT info.
+        rpc GetConversationsByUser(Uuid) returns (ArrayConversationResponse) {}
+
+        rpc UpdateConversationInfo(Conversation) returns (UpdateConversationResponse) {}
+        
+
+        rpc CreateMessage(CreateMessageRequest) returns (UuidMsg) {}
+        //Later change userUuid to use JWT info.
+        rpc GetMessagesByConversation(GetMessages) returns (ArrayMessageResponse) {}
+        rpc UpdateMessage(Message) returns (MessageMsgResponse) {}
+        
+        rpc CreateUserConversation(CreateUserConversationRequest) returns (SvrMsg) {}
+        rpc KickUser(KickUserRequest) returns (SvrMsg) {}
+
+    }
+     //  mensaje - post- productor de eventos- llama a kafka - 
+
+ // Conversations-------
+ message Conversation{
+     Uuid uuid =1;
+     int32 type =2;
+     double created_at= 3;
+     Message last_msg= 4;
+     string name =5;
+    string description =6;
+    string avatar_url=7;
+}
+
+message UserConversation{
+    Uuid uuid =1;
+    Uuid user_uuid =2;
+    Uuid last_access_uuid = 4;
+    double created_at =5;
+}
+
+message ConversationAndParticipants{
+    Conversation conversation =1;
+    UserConversation user_conversation =2;
+    repeated UserConversation participants =3;
+    int32 unread_messages = 4;
+}
+
+message UpdateConversationResponse{
+    Conversation conversation =1;
+    SvrMsg msg=2;
+}
+
+
+message ArrayConversationResponse{
+    repeated ConversationAndParticipants conversations = 1;
+    SvrMsg msg =2;
+}
+
+message CreateUserConversationRequest{
+    Uuid conversation_uuid =1;
+    repeated UserConversation user_conversations =2;
+}
+
+message KickUserRequest{
+    Uuid user_conversation =1;
+    Uuid conversation =2;
+}
+
+// ----------
+// Messages
+message Message{
+    Uuid uuid =1;
+    Uuid conversation_uuid =2;
+    Uuid author_uuid=3;
+    string text=4;
+    double created_at=5;
+    double updated_at=6;
+}
+
+message CreateMessageRequest{
+    Message message =1;
+    bool  create_conversation =3;
+    ConversationAndParticipants new_convo=4;
+}
+
+
+message MessageMsgResponse{
+    Message message =1;
+    SvrMsg msg=2;
+}
+message ArrayMessageResponse{
+    repeated Message message = 1;
+    SvrMsg msg=2;
+}
+message GetMessages{
+    Uuid uuid=1;
+    double before_date=2;
+    double after_date=3;
+}
+//----
+//other
+message Uuid {
+    string uuid =1;
+}
+
+message SvrMsg{
+    int64 status=1;
+    string message=2;
+}
+
+message UuidMsg{
+    Uuid uuid =1;
+    SvrMsg msg=2;
+}
